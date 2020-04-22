@@ -81,6 +81,32 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, Constants.REQUEST_CODE);
     }
 
+
+    public void startUvcCamera1(View view) {
+        Intent intent = new Intent(MainActivity.this, UVCCameraActivity.class);
+        intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, false);
+        startActivityForResult(intent, Constants.REQUEST_CODE);
+    }
+
+
+    public void startUvcCamera2(View view) {
+        Intent intent = new Intent(MainActivity.this, UVCCameraActivity.class);
+        intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, true);
+        startActivityForResult(intent, Constants.REQUEST_CODE);
+    }
+
+    public void startUVCTwoViewCamera(View view) {
+        Intent intent = new Intent(MainActivity.this, UVCTwoViewActivity.class);
+        intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, false);
+        startActivityForResult(intent, Constants.REQUEST_CODE);
+    }
+
+    public void startUVCAutoTwoViewCamera(View view) {
+        Intent intent = new Intent(MainActivity.this, UVCAutoTwoViewActivity.class);
+        intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, false);
+        startActivityForResult(intent, Constants.REQUEST_CODE);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

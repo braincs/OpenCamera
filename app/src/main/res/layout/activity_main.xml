@@ -17,4 +17,27 @@
         android:onClick="startCamera1"
         android:text="Android Front Camera" />
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startUvcCamera1"
+        android:text="Android UVC Camera1" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startUvcCamera2"
+        android:text="Android UVC Camera2" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startUVCTwoViewCamera"
+        android:text="UVCCamera Two View" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startUVCAutoTwoViewCamera"
+        android:text="UVCCamera Auto Two View" />
 </LinearLayout>
