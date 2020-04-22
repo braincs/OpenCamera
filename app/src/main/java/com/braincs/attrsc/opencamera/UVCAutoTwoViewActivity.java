@@ -15,6 +15,7 @@ import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
+import com.braincs.attrsc.opencamera.utils.Constants;
 import com.serenegiant.common.BaseActivity;
 import com.serenegiant.usb.CameraDialog;
 import com.serenegiant.usb.DeviceFilter;
@@ -22,10 +23,12 @@ import com.serenegiant.usb.USBMonitor;
 import com.serenegiant.usb.USBMonitor.OnDeviceConnectListener;
 import com.serenegiant.usb.USBMonitor.UsbControlBlock;
 import com.serenegiant.usb.UVCCamera;
+import com.serenegiant.usbcameracommon.AbstractUVCCameraHandler;
 import com.serenegiant.usbcameracommon.UVCCameraHandler;
 import com.serenegiant.widget.CameraViewInterface;
 import com.serenegiant.widget.UVCCameraTextureView;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,8 +49,6 @@ public class UVCAutoTwoViewActivity extends BaseActivity implements CameraDialog
     private CameraViewInterface mUVCCameraViewL;
     private ImageButton mCaptureButtonL;
     private Surface mLeftPreviewSurface;
-
-    private List<UsbDevice> UVCDevices = new ArrayList<>(3);
     private boolean isLeftTriggered = false;
 
 
@@ -59,6 +60,7 @@ public class UVCAutoTwoViewActivity extends BaseActivity implements CameraDialog
         findViewById(R.id.RelativeLayout1).setOnClickListener(mOnClickListener);
         mUVCCameraViewL = (CameraViewInterface) findViewById(R.id.camera_view_L);
         mUVCCameraViewL.setAspectRatio(UVCCamera.DEFAULT_PREVIEW_WIDTH / (float) UVCCamera.DEFAULT_PREVIEW_HEIGHT);
+        ((UVCCameraTextureView) mUVCCameraViewL).setRotation(Constants.ORIENTATION_90);
         ((UVCCameraTextureView) mUVCCameraViewL).setOnClickListener(mOnClickListener);
         mCaptureButtonL = (ImageButton) findViewById(R.id.capture_button_L);
         mCaptureButtonL.setOnClickListener(mOnClickListener);
@@ -67,6 +69,7 @@ public class UVCAutoTwoViewActivity extends BaseActivity implements CameraDialog
 
         mUVCCameraViewR = (CameraViewInterface) findViewById(R.id.camera_view_R);
         mUVCCameraViewR.setAspectRatio(UVCCamera.DEFAULT_PREVIEW_WIDTH / (float) UVCCamera.DEFAULT_PREVIEW_HEIGHT);
+        ((UVCCameraTextureView) mUVCCameraViewR).setRotation(Constants.ORIENTATION_270);
         ((UVCCameraTextureView) mUVCCameraViewR).setOnClickListener(mOnClickListener);
         mCaptureButtonR = (ImageButton) findViewById(R.id.capture_button_R);
         mCaptureButtonR.setOnClickListener(mOnClickListener);
@@ -190,32 +193,18 @@ public class UVCAutoTwoViewActivity extends BaseActivity implements CameraDialog
             if (DEBUG) Log.v(TAG, "onAttach:" + device);
             mUSBMonitor.requestPermission(device);
 
-//            queueEvent(new Runnable() {
-//                @Override
-//                public void run() {
-//                    mUSBMonitor.requestPermission(device);
-//                }
-//            }, 500);
-
-//            if (!UVCDevices.contains(device)) UVCDevices.add(device);
-//
-//            if (!mHandlerL.isOpened() && UVCDevices.size() == 1) {
-//                mUSBMonitor.requestPermission(UVCDevices.get(0));
-//            }
-//            if (!mHandlerR.isOpened() && UVCDevices.size() == 2){
-//                mUSBMonitor.requestPermission(UVCDevices.get(1));
-//            }
             Toast.makeText(UVCAutoTwoViewActivity.this, "USB_DEVICE_ATTACHED", Toast.LENGTH_SHORT).show();
         }
 
         @Override
         public void onConnect(final UsbDevice device, final UsbControlBlock ctrlBlock, final boolean createNew) {
             if (DEBUG) Log.v(TAG, "onConnect:" + device);
-            if (!isLeftTriggered) {
+            if (!isLeftTriggered && !mHandlerL.isOpened()) {
                 isLeftTriggered = true;
                 Log.d(TAG, "open left");
                 mHandlerL.open(ctrlBlock);
                 final SurfaceTexture st = mUVCCameraViewL.getSurfaceTexture();
+                mHandlerL.setFrameCallBack(uvcFrameCallBackL);
                 mHandlerL.startPreview(new Surface(st));
                 runOnUiThread(new Runnable() {
                     @Override
@@ -227,6 +216,7 @@ public class UVCAutoTwoViewActivity extends BaseActivity implements CameraDialog
                 Log.d(TAG, "open right");
                 mHandlerR.open(ctrlBlock);
                 final SurfaceTexture st = mUVCCameraViewR.getSurfaceTexture();
+                mHandlerR.setFrameCallBack(uvcFrameCallBackR);
                 mHandlerR.startPreview(new Surface(st));
                 runOnUiThread(new Runnable() {
                     @Override
@@ -314,4 +304,19 @@ public class UVCAutoTwoViewActivity extends BaseActivity implements CameraDialog
             }
         }, 0);
     }
+
+    private AbstractUVCCameraHandler.UVCFrameCallBack uvcFrameCallBackL = new AbstractUVCCameraHandler.UVCFrameCallBack() {
+        @Override
+        public void onFrame(ByteBuffer byteBuffer) {
+            Log.d(TAG, "left frame remain = " + byteBuffer.remaining());
+        }
+    };
+
+    private AbstractUVCCameraHandler.UVCFrameCallBack uvcFrameCallBackR = new AbstractUVCCameraHandler.UVCFrameCallBack() {
+        @Override
+        public void onFrame(ByteBuffer byteBuffer) {
+            Log.d(TAG, "right frame remain = " + byteBuffer.remaining());
+        }
+    };
+
 }
