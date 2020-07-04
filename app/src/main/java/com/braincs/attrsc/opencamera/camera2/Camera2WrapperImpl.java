@@ -417,8 +417,11 @@ public class Camera2WrapperImpl extends CameraWrapper {
                     if (mIsBackCamera && // back camera
                             CameraCharacteristics.LENS_FACING_BACK == facing) {
                         cameraId = id;
-                    } else if (CameraCharacteristics.LENS_FACING_FRONT == facing) {
+//                        Log.d(TAG, "isBack : " + mIsBackCamera +", cameraid = " + cameraId);
+                        break;
+                    } else if (!mIsBackCamera && CameraCharacteristics.LENS_FACING_FRONT == facing) {
                         cameraId = id;
+//                        Log.d(TAG, "isBack : " + mIsBackCamera +", cameraid = " + cameraId);
                         break;
                     }
                 }
