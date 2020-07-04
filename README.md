@@ -2,6 +2,8 @@
 
 <img src="README-images/image-20200422180444527.png" alt="image-20200422180444527" />
 
+[中文版：README-CN](./README-CN.md)
+
 ## Introduction
 
 Aim to design easy-to-use module to help develop camera app quickly and smoothly
@@ -12,7 +14,9 @@ Mainly based on
   - Android Back camera
   - Android Front camera
 
-
+- Android Camera2 API  :arrow_right:
+    - Android Back camera
+    - Android Front camera
 
 - UVCCamera API :arrow_right:
   - Android UVC camera1
