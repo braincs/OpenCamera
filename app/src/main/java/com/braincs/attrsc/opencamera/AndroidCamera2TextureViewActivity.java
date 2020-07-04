@@ -200,9 +200,8 @@ public class AndroidCamera2TextureViewActivity extends AppCompatActivity {
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
             Log.d(TAG, "onSurfaceTextureDestroyed()...rgb");
 //            destroyCamera();
-            mCameraWrapper.stopPreview();
 //                mPresenter.onDestroy();
-            return false;
+            return true;
         }
 
         @Override
@@ -215,8 +214,8 @@ public class AndroidCamera2TextureViewActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
         mCameraWrapper.closeCamera();
+        super.onDestroy();
     }
 
     //region Camera callback

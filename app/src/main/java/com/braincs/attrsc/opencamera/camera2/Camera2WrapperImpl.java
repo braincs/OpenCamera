@@ -29,6 +29,8 @@ import com.braincs.attrsc.opencamera.utils.FrameUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 
 @TargetApi(21)
 public class Camera2WrapperImpl extends CameraWrapper {
@@ -68,6 +70,7 @@ public class Camera2WrapperImpl extends CameraWrapper {
         ORIENTATIONS.append(Surface.ROTATION_180, 270);
         ORIENTATIONS.append(Surface.ROTATION_270, 180);
     }
+    private Semaphore mCameraOpenCloseLock = new Semaphore(1);
 
 
     // Listener for frame data of preview
@@ -102,6 +105,7 @@ public class Camera2WrapperImpl extends CameraWrapper {
         @Override
         public void onOpened(@NonNull CameraDevice cameraDevice) {
             Log.d(TAG, "onOpened()...");
+            mCameraOpenCloseLock.release();
             mCameraDevice = cameraDevice;
             callbackToCaller(Result.RESULT_SUCCESS);
         }
@@ -109,6 +113,7 @@ public class Camera2WrapperImpl extends CameraWrapper {
         @Override
         public void onDisconnected(@NonNull CameraDevice cameraDevice) {
             Log.d(TAG, "onDisconnected()...");
+            mCameraOpenCloseLock.release();
             mCameraDevice.close();
             mCameraDevice = null;
             callbackToCaller(Result.RESULT_DISCONNECTED);
@@ -117,6 +122,7 @@ public class Camera2WrapperImpl extends CameraWrapper {
         @Override
         public void onError(@NonNull CameraDevice cameraDevice, int errorCode) {
             Log.d(TAG, "onError()...code:" + errorCode);
+            mCameraOpenCloseLock.release();
             mCameraDevice.close();
             mCameraDevice = null;
             callbackToCaller(Result.RESULT_FAILED);
@@ -203,6 +209,7 @@ public class Camera2WrapperImpl extends CameraWrapper {
         if (checkNotNull(mCameraCaptureSession)) {
             try {
                 mCameraCaptureSession.stopRepeating();
+                mCameraCaptureSession.close();
             } catch (Exception e ) {
                 e.printStackTrace();
                 Log.e(TAG, "exception when stop repeating");
@@ -210,6 +217,10 @@ public class Camera2WrapperImpl extends CameraWrapper {
             mCameraCaptureSession = null;
         }
 
+        if (checkNotNull(mCameraDevice)) {
+            mCameraDevice.close();
+            mCameraDevice = null;
+        }
         // set Image Reader
         if (checkNotNull(mImageReader)) {
             mImageReader.close();
@@ -223,11 +234,14 @@ public class Camera2WrapperImpl extends CameraWrapper {
     @Override
     public void closeCamera() {
         Log.d(TAG, "closeCamera()...");
-        stopPreview();
+        try {
+            mCameraOpenCloseLock.acquire();
+            stopPreview();
 
-        if (checkNotNull(mCameraDevice)) {
-            mCameraDevice.close();
-            mCameraDevice = null;
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            mCameraOpenCloseLock.release();
         }
 
         // reset camera info
@@ -314,6 +328,9 @@ public class Camera2WrapperImpl extends CameraWrapper {
 
         // Open Camera
         try {
+            if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
+                throw new RuntimeException("Time out waiting to lock camera opening.");
+            }
             mCameraManager.openCamera(mCameraId, mCameraStateCallback, mHandler);
         } catch (CameraAccessException e) {
             Log.e(TAG, "Failed to open Camera");
@@ -323,6 +340,8 @@ public class Camera2WrapperImpl extends CameraWrapper {
             Log.e(TAG, "Failed to open Camera");
             e.printStackTrace();
             callbackToCaller(Result.RESULT_FAILED);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
