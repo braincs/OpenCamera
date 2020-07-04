@@ -1,24 +1,18 @@
 package com.braincs.attrsc.opencamera;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
-import android.graphics.SurfaceTexture;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.TextureView;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -30,14 +24,12 @@ import com.braincs.attrsc.opencamera.camera2.CameraWrapper;
 import com.braincs.attrsc.opencamera.utils.Constants;
 import com.braincs.attrsc.opencamera.utils.ScreenUtils;
 
-import java.io.IOException;
-
 /**
  * Created by Shuai
  * 27/03/2020.
  */
-public class AndroidCamera2Activity extends AppCompatActivity {
-    private final static String TAG = AndroidCamera2Activity.class.getSimpleName();
+public class AndroidCamera2SurfaceViewActivity extends AppCompatActivity {
+    private final static String TAG = AndroidCamera2SurfaceViewActivity.class.getSimpleName();
 
     private SurfaceView mSurfaceView;
     private Context mContext;
@@ -264,6 +256,12 @@ public class AndroidCamera2Activity extends AppCompatActivity {
     };
     //endregion
 
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mCameraWrapper.closeCamera();
+    }
 
     private void finishWithArgs(String msg, String path) {
         mIntent.putExtra(Constants.INTENT_KEY_RESULT, msg);
