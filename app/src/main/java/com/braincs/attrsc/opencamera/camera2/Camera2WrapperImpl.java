@@ -163,7 +163,7 @@ public class Camera2WrapperImpl extends CameraWrapper {
      * @param callback receive frame data of preview
      */
     @Override
-    public void startDetect(IPreviewCallback callback) {
+    public void setFrameCallback(IPreviewCallback callback) {
         setPreviewCallback(callback);
     }
 
@@ -171,7 +171,7 @@ public class Camera2WrapperImpl extends CameraWrapper {
      * Stop detecting，
      */
     @Override
-    public void stopDetect() {
+    public void removeFrameCallback() {
         setPreviewCallback(null);
     }
 

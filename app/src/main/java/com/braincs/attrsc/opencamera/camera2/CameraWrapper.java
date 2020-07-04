@@ -22,11 +22,11 @@ import android.view.SurfaceHolder;
  *   call startPreview for previewing frame data once SurfaceHolder is created completely.
  *   If failed to open camera, this action of starting Preview is invalid.
  *
- * 4.startDetect:
- *   call startDetect for processing frame data
+ * 4.setFrameCallback:
+ *   call setFrameCallback for processing frame data
  *
- * 5.stopDetect:
- *   call stopDetect for stopping frame data. You can call startDetect again for continuing to process.
+ * 5.removeFrameCallback:
+ *   call removeFrameCallback for stopping frame data. You can call setFrameCallback again for continuing to process.
  *
  * 6.stopPreview:
  *   call stopPreview for stopping previewing. You can call startPreview again for continuing to preview
@@ -67,12 +67,12 @@ public abstract class CameraWrapper {
      * Begin to detect and receive frame data of preview
      * @param callback receive frame data of preview
      */
-    public void startDetect(IPreviewCallback callback) {}
+    public void setFrameCallback(IPreviewCallback callback) {}
 
     /**
      * Stop detecting
      */
-    public void stopDetect() {}
+    public void removeFrameCallback() {}
 
     /**
      * Stop preview
