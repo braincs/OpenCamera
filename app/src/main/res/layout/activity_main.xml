@@ -20,6 +20,30 @@
     <Button
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:onClick="startBackCamera2"
+        android:text="Android Back Camera2 SurfaceView" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startFrontCamera2"
+        android:text="Android Front Camera2 SurfaceView" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startBackCamera2TextureView"
+        android:text="Android Back Camera2 TextureView" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startFrontCamera2TextureView"
+        android:text="Android Front Camera2 TextureView" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
         android:onClick="startUvcCamera1"
         android:text="Android UVC Camera1" />
 
