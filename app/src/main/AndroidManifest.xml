@@ -28,6 +28,7 @@
         <activity android:name=".UVCCameraActivity" />
         <activity android:name=".UVCTwoViewActivity" />
         <activity android:name=".UVCAutoTwoViewActivity" />
+        <activity android:name=".AndroidCamera2Activity" />
     </application>
 
 </manifest>

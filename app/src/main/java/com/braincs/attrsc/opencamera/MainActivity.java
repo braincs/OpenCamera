@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
     }
+
     public void startCamera0(View view) {
         Intent intent = new Intent(MainActivity.this, AndroidCameraActivity.class);
         intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, false);
@@ -81,6 +82,17 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, Constants.REQUEST_CODE);
     }
 
+    public void startBackCamera2(View view) {
+        Intent intent = new Intent(MainActivity.this, AndroidCamera2Activity.class);
+        intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, false);
+        startActivityForResult(intent, Constants.REQUEST_CODE);
+    }
+
+    public void startFrontCamera2(View view) {
+        Intent intent = new Intent(MainActivity.this, AndroidCamera2Activity.class);
+        intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, true);
+        startActivityForResult(intent, Constants.REQUEST_CODE);
+    }
 
     public void startUvcCamera1(View view) {
         Intent intent = new Intent(MainActivity.this, UVCCameraActivity.class);
