@@ -1,6 +1,7 @@
 package com.braincs.attrsc.opencamera.camera2;
 
 import android.content.Context;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.view.SurfaceHolder;
 
@@ -56,6 +57,12 @@ public abstract class CameraWrapper {
      * @param surfaceHolder
      */
     public void startPreview(SurfaceHolder surfaceHolder) {}
+
+    /**
+     * Start preview
+     * @param surfaceTexture
+     */
+    public void startPreview(SurfaceTexture surfaceTexture) {}
 
     /**
      * Set Orientation of Display

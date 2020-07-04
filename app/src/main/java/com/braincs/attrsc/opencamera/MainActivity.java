@@ -83,13 +83,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void startBackCamera2(View view) {
-        Intent intent = new Intent(MainActivity.this, AndroidCamera2Activity.class);
+        Intent intent = new Intent(MainActivity.this, AndroidCamera2SurfaceViewActivity.class);
         intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, false);
         startActivityForResult(intent, Constants.REQUEST_CODE);
     }
 
     public void startFrontCamera2(View view) {
-        Intent intent = new Intent(MainActivity.this, AndroidCamera2Activity.class);
+        Intent intent = new Intent(MainActivity.this, AndroidCamera2SurfaceViewActivity.class);
+        intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, true);
+        startActivityForResult(intent, Constants.REQUEST_CODE);
+    }
+
+    public void startBackCamera2TextureView(View view) {
+        Intent intent = new Intent(MainActivity.this, AndroidCamera2TextureViewActivity.class);
+        intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, false);
+        startActivityForResult(intent, Constants.REQUEST_CODE);
+    }
+
+    public void startFrontCamera2TextureView(View view) {
+        Intent intent = new Intent(MainActivity.this, AndroidCamera2TextureViewActivity.class);
         intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, true);
         startActivityForResult(intent, Constants.REQUEST_CODE);
     }

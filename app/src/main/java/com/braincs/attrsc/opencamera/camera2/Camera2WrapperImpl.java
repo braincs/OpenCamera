@@ -5,6 +5,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.ImageFormat;
+import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
@@ -58,6 +59,7 @@ public class Camera2WrapperImpl extends CameraWrapper {
     private ImageReader mImageReader;
     private IPreviewCallback mPreviewCallback;
     private SurfaceHolder mSurfaceHolder;
+    private SurfaceTexture mSurfaceTexture;
 
     private static final SparseIntArray ORIENTATIONS = new SparseIntArray();
     static {
@@ -128,7 +130,8 @@ public class Camera2WrapperImpl extends CameraWrapper {
     @Override
     public void openCamera(boolean isBackCamera, Context context, CameraOpenCallback callback, int width, int height) {
         Log.d(TAG, "openCamera()...back camera:" + isBackCamera);
-
+        mWidth = width;
+        mHeight = height;
         // init worker thread
         initEventLooper(context);
 
@@ -152,6 +155,22 @@ public class Camera2WrapperImpl extends CameraWrapper {
 
         // save holder
         mSurfaceHolder = surfaceHolder;
+
+        // obtain message
+        Message msg = Message.obtain(mHandler, EVENT_START_PREVIEW);
+        msg.sendToTarget();
+    }
+
+    /**
+     * Start Preview
+     * @param surfaceTexture surface texture
+     */
+    @Override
+    public void startPreview(SurfaceTexture surfaceTexture) {
+        Log.d(TAG, "startPreview()...");
+
+        // save holder
+        mSurfaceTexture = surfaceTexture;
 
         // obtain message
         Message msg = Message.obtain(mHandler, EVENT_START_PREVIEW);
@@ -322,14 +341,24 @@ public class Camera2WrapperImpl extends CameraWrapper {
         // Camera already opened and go to preview
         List<Surface> surfaces = new ArrayList<>();
         surfaces.add(mImageReader.getSurface());
-        surfaces.add(mSurfaceHolder.getSurface());
-
+        if (checkNotNull(mSurfaceHolder)) {
+            surfaces.add(mSurfaceHolder.getSurface());
+        }
+        if (checkNotNull(mSurfaceTexture)){
+            mSurfaceTexture.setDefaultBufferSize(mWidth, mHeight);
+            surfaces.add(new Surface(mSurfaceTexture));
+        }
         try {
             // create Capture request
             final CaptureRequest.Builder builder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             builder.addTarget(mImageReader.getSurface());
-            builder.addTarget(mSurfaceHolder.getSurface());
-
+            if (checkNotNull(mSurfaceHolder)) {
+                builder.addTarget(mSurfaceHolder.getSurface());
+            }
+            if (checkNotNull(mSurfaceTexture)){
+                mSurfaceTexture.setDefaultBufferSize(mWidth, mHeight);
+                builder.addTarget(new Surface(mSurfaceTexture));
+            }
             // create Capture Session
             mCameraDevice.createCaptureSession(surfaces, new CameraCaptureSession.StateCallback() {
                 @Override
