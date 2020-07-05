@@ -31,5 +31,17 @@
             android:onClick="onClickSaveTestImg"
             android:text="..."
             android:textColor="@android:color/holo_red_light" />
+
+        <ImageButton
+            android:id="@+id/capture_button"
+            android:layout_width="@dimen/button_size"
+            android:layout_height="@dimen/button_size"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="6dp"
+            android:background="@null"
+            android:onClick="onClickCapture"
+            android:scaleType="centerCrop"
+            android:src="@android:drawable/ic_menu_camera" />
     </RelativeLayout>
 </RelativeLayout>
