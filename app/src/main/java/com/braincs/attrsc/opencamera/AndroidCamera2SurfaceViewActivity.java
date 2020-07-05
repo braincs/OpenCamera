@@ -289,5 +289,6 @@ public class AndroidCamera2SurfaceViewActivity extends AppCompatActivity {
         if (!isSavePreview){
             isSavePreview = true;
         }
+        Toast.makeText(mContext, "saving image ...", Toast.LENGTH_SHORT).show();
     }
 }

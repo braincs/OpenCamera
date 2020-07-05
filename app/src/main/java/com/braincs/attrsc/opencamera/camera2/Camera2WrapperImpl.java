@@ -72,7 +72,8 @@ public class Camera2WrapperImpl extends CameraWrapper {
     }
     private Semaphore mCameraOpenCloseLock = new Semaphore(1);
 
-
+//    long sum = 0L;
+//    int count = 0;
     // Listener for frame data of preview
     private ImageReader.OnImageAvailableListener mImageAvailableListener = new ImageReader.OnImageAvailableListener() {
         @Override
@@ -80,7 +81,15 @@ public class Camera2WrapperImpl extends CameraWrapper {
             Image image = reader.acquireNextImage();
             if (checkNotNull(mPreviewCallback)) {
                 byte[] yuvData = new byte[image.getHeight() * image.getWidth() * 3 / 2];
+//                long start = System.currentTimeMillis();
+                //方法1：6ms
                 FrameUtil.image2NV21(image, yuvData);
+
+                //方法2：6ms
+//                System.arraycopy(FrameUtil.getBytesFromImageAsType(image, 0), 0, yuvData, 0, yuvData.length);
+//                sum += System.currentTimeMillis() - start;
+//                count++;
+//                Log.d(TAG, "420_nv21 average = " + (sum / count));
                 mPreviewCallback.onPreviewFrame(yuvData, null);
             }
 
