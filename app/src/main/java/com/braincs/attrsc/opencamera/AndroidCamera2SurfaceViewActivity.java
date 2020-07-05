@@ -13,6 +13,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -22,7 +23,12 @@ import android.widget.Toast;
 import com.braincs.attrsc.opencamera.camera2.Camera2WrapperImpl;
 import com.braincs.attrsc.opencamera.camera2.CameraWrapper;
 import com.braincs.attrsc.opencamera.utils.Constants;
+import com.braincs.attrsc.opencamera.utils.DateUtil;
+import com.braincs.attrsc.opencamera.utils.FileUtil;
+import com.braincs.attrsc.opencamera.utils.SaveFrameTask;
 import com.braincs.attrsc.opencamera.utils.ScreenUtils;
+
+import java.io.File;
 
 /**
  * Created by Shuai
@@ -30,6 +36,7 @@ import com.braincs.attrsc.opencamera.utils.ScreenUtils;
  */
 public class AndroidCamera2SurfaceViewActivity extends AppCompatActivity {
     private final static String TAG = AndroidCamera2SurfaceViewActivity.class.getSimpleName();
+    private static final String APP_FOLDER = "OpenCamera";
 
     private SurfaceView mSurfaceView;
     private Context mContext;
@@ -43,6 +50,7 @@ public class AndroidCamera2SurfaceViewActivity extends AppCompatActivity {
     private CameraWrapper mCameraWrapper;
     private SurfaceHolder mSurfaceHolder;
     private boolean mIsCameraOpened;
+    private volatile boolean isSavePreview = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -251,6 +259,14 @@ public class AndroidCamera2SurfaceViewActivity extends AppCompatActivity {
         @Override
         public void onPreviewFrame(byte[] bytes, Camera camera) {
             Log.d(TAG, "frame length = " + bytes.length);
+            if (isSavePreview){
+                isSavePreview = false;
+                String dateTimeMs = DateUtil.getDateTimeMs();
+                SaveFrameTask saveFrameTask = new SaveFrameTask(bytes,
+                        new File(FileUtil.getExternalFolder(mContext, APP_FOLDER),  dateTimeMs + ".yuv"),
+                        new File(FileUtil.getExternalFolder(mContext, APP_FOLDER), dateTimeMs + ".jpg"));
+                new Thread(saveFrameTask).start();
+            }
 
         }
     };
@@ -267,5 +283,11 @@ public class AndroidCamera2SurfaceViewActivity extends AppCompatActivity {
         mIntent.putExtra(Constants.INTENT_KEY_RESULT, msg);
         setResult(RESULT_OK, mIntent);
         finish();
+    }
+
+    public void onClickCapture(View view) {
+        if (!isSavePreview){
+            isSavePreview = true;
+        }
     }
 }
