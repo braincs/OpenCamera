@@ -65,16 +65,16 @@ public class UVCAutoTwoViewActivity extends BaseActivity implements CameraDialog
         mCaptureButtonL = (ImageButton) findViewById(R.id.capture_button_L);
         mCaptureButtonL.setOnClickListener(mOnClickListener);
         mCaptureButtonL.setVisibility(View.INVISIBLE);
-        mHandlerL = UVCCameraHandler.createHandler(this, mUVCCameraViewL, UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, BANDWIDTH_FACTORS[0]);
+        mHandlerL = UVCCameraHandler.createHandler(this, mUVCCameraViewL,1,  UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 1, BANDWIDTH_FACTORS[0]);
 
         mUVCCameraViewR = (CameraViewInterface) findViewById(R.id.camera_view_R);
         mUVCCameraViewR.setAspectRatio(UVCCamera.DEFAULT_PREVIEW_WIDTH / (float) UVCCamera.DEFAULT_PREVIEW_HEIGHT);
-        ((UVCCameraTextureView) mUVCCameraViewR).setRotation(Constants.ORIENTATION_270);
+        ((UVCCameraTextureView) mUVCCameraViewR).setRotation(Constants.ORIENTATION_90);
         ((UVCCameraTextureView) mUVCCameraViewR).setOnClickListener(mOnClickListener);
         mCaptureButtonR = (ImageButton) findViewById(R.id.capture_button_R);
         mCaptureButtonR.setOnClickListener(mOnClickListener);
         mCaptureButtonR.setVisibility(View.INVISIBLE);
-        mHandlerR = UVCCameraHandler.createHandler(this, mUVCCameraViewR, UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, BANDWIDTH_FACTORS[1]);
+        mHandlerR = UVCCameraHandler.createHandler(this, mUVCCameraViewR, 1, UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 1, BANDWIDTH_FACTORS[1]);
 
         mUSBMonitor = new USBMonitor(this, mOnDeviceConnectListener);
         final List<DeviceFilter> filters = DeviceFilter.getDeviceFilters(this, R.xml.device_filter);

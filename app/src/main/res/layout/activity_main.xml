@@ -64,4 +64,10 @@
         android:layout_height="wrap_content"
         android:onClick="startUVCAutoTwoViewCamera"
         android:text="UVCCamera Auto Two View" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="startUVCAutoTwoViewCamera2"
+        android:text="UVCCamera2 Auto Two View" />
 </LinearLayout>

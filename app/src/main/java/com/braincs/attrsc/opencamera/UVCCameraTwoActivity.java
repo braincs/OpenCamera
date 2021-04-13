@@ -14,6 +14,7 @@ import android.support.annotation.RequiresApi;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Surface;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.RelativeLayout;
@@ -38,14 +39,17 @@ import java.util.List;
  * Created by Shuai
  * 27/03/2020.
  */
-public class UVCCameraActivity extends BaseActivity implements CameraDialog.CameraDialogParent {
-    private final static String TAG = UVCCameraActivity.class.getSimpleName();
+public class UVCCameraTwoActivity extends BaseActivity implements CameraDialog.CameraDialogParent {
+    private final static String TAG = UVCCameraTwoActivity.class.getSimpleName();
     private final Object mSync = new Object();
 
     private USBMonitor mUSBMonitor;
-    private UVCCamera mUVCCamera;
-    private SimpleUVCCameraTextureView mUVCCameraView;
-    private Surface mPreviewSurface;
+    private UVCCamera mUVCCameraL;
+    private UVCCamera mUVCCameraR;
+    private SimpleUVCCameraTextureView mUVCCameraViewL;
+    private SimpleUVCCameraTextureView mUVCCameraViewR;
+    private Surface mPreviewSurfaceL;
+    private Surface mPreviewSurfaceR;
     private List<UsbDevice> UVCDevices = new ArrayList<>(3);
     private ByteBuffer uvcBuffer;
 
@@ -63,7 +67,7 @@ public class UVCCameraActivity extends BaseActivity implements CameraDialog.Came
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        setContentView(R.layout.activity_uvc_camera);
+        setContentView(R.layout.activity_two_view_uvc_camera2);
         mContext = this;
 
         Log.d(TAG, "--onCreate--");
@@ -100,8 +104,13 @@ public class UVCCameraActivity extends BaseActivity implements CameraDialog.Came
         }
 //        mUSBMonitor.requestPermission(deviceList.get(0));
         synchronized (mSync) {
-            if (mUVCCamera != null) {
-                mUVCCamera.startPreview();
+            if (mUVCCameraL != null) {
+                mUVCCameraL.startPreview();
+            }
+        }
+        synchronized (mSync) {
+            if (mUVCCameraR != null) {
+                mUVCCameraR.startPreview();
             }
         }
     }
@@ -109,8 +118,11 @@ public class UVCCameraActivity extends BaseActivity implements CameraDialog.Came
     @Override
     protected void onStop() {
         synchronized (mSync) {
-            if (mUVCCamera != null) {
-                mUVCCamera.stopPreview();
+            if (mUVCCameraL != null) {
+                mUVCCameraL.stopPreview();
+            }
+            if (mUVCCameraR != null) {
+                mUVCCameraR.stopPreview();
             }
             if (mUSBMonitor != null) {
                 mUSBMonitor.unregister();
@@ -130,11 +142,17 @@ public class UVCCameraActivity extends BaseActivity implements CameraDialog.Came
                 mUSBMonitor.destroy();
                 mUSBMonitor = null;
             }
-            if (mPreviewSurface != null) {
-                mPreviewSurface.release();
-                mPreviewSurface = null;
+            if (mPreviewSurfaceL != null) {
+                mPreviewSurfaceL.release();
+                mPreviewSurfaceL = null;
             }
-            mUVCCameraView = null;
+            mUVCCameraViewL = null;
+
+            if (mPreviewSurfaceR != null) {
+                mPreviewSurfaceR.release();
+                mPreviewSurfaceR = null;
+            }
+            mUVCCameraViewR = null;
 
         }
         super.onDestroy();
@@ -211,9 +229,27 @@ public class UVCCameraActivity extends BaseActivity implements CameraDialog.Came
     //region Camera
     private void initUVCCamera() {
         isOpened = false;
-        mUVCCameraView = (SimpleUVCCameraTextureView) findViewById(R.id.simpleUVCCameraTextureView);
-        mUVCCameraView.setAspectRatio((float) UVCCamera.DEFAULT_PREVIEW_WIDTH / UVCCamera.DEFAULT_PREVIEW_HEIGHT);
-        mUVCCameraView.setRotation(Constants.ORIENTATION_90);
+        mUVCCameraViewL = (SimpleUVCCameraTextureView) findViewById(R.id.camera_view_L);
+        mUVCCameraViewL.setAspectRatio((float) UVCCamera.DEFAULT_PREVIEW_WIDTH / UVCCamera.DEFAULT_PREVIEW_HEIGHT);
+        mUVCCameraViewL.setRotation(Constants.ORIENTATION_90);
+        mUVCCameraViewL.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, UVCDevices.get(0).toString());
+                mUSBMonitor.requestPermission(UVCDevices.get(0));
+            }
+        });
+
+        mUVCCameraViewR = (SimpleUVCCameraTextureView) findViewById(R.id.camera_view_R);
+        mUVCCameraViewR.setAspectRatio((float) UVCCamera.DEFAULT_PREVIEW_WIDTH / UVCCamera.DEFAULT_PREVIEW_HEIGHT);
+        mUVCCameraViewR.setRotation(Constants.ORIENTATION_90);
+        mUVCCameraViewR.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, UVCDevices.get(1).toString());
+                mUSBMonitor.requestPermission(UVCDevices.get(1));
+            }
+        });
 
         mUSBMonitor = new USBMonitor(mContext, mOnDeviceConnectListener);
             final List<DeviceFilter> filters = DeviceFilter.getDeviceFilters(this, R.xml.device_filter);
@@ -223,20 +259,35 @@ public class UVCCameraActivity extends BaseActivity implements CameraDialog.Came
 
     private synchronized void releaseCamera() {
         synchronized (mSync) {
-            if (mUVCCamera != null) {
+            if (mUVCCameraL != null) {
                 try {
-                    mUVCCamera.setStatusCallback(null);
-                    mUVCCamera.setButtonCallback(null);
-                    mUVCCamera.close();
-                    mUVCCamera.destroy();
+                    mUVCCameraL.setStatusCallback(null);
+                    mUVCCameraL.setButtonCallback(null);
+                    mUVCCameraL.close();
+                    mUVCCameraL.destroy();
                 } catch (final Exception e) {
                     //
                 }
-                mUVCCamera = null;
+                mUVCCameraL = null;
             }
-            if (mPreviewSurface != null) {
-                mPreviewSurface.release();
-                mPreviewSurface = null;
+            if (mPreviewSurfaceL != null) {
+                mPreviewSurfaceL.release();
+                mPreviewSurfaceL = null;
+            }
+            if (mUVCCameraR != null) {
+                try {
+                    mUVCCameraR.setStatusCallback(null);
+                    mUVCCameraR.setButtonCallback(null);
+                    mUVCCameraR.close();
+                    mUVCCameraR.destroy();
+                } catch (final Exception e) {
+                    //
+                }
+                mUVCCameraR = null;
+            }
+            if (mPreviewSurfaceR != null) {
+                mPreviewSurfaceR.release();
+                mPreviewSurfaceR = null;
             }
         }
     }
@@ -260,11 +311,10 @@ public class UVCCameraActivity extends BaseActivity implements CameraDialog.Came
 //                    }
 //                }
 //            }
-            int index = isFront? 0:1;
             synchronized (mSync) {
-                if (mUSBMonitor != null && !isOpened && UVCDevices.size() > index){
+                if (mUSBMonitor != null && !isOpened && UVCDevices.size() > 1){
                     isOpened = true;
-                    mUSBMonitor.requestPermission(UVCDevices.get(index));
+                    mUSBMonitor.requestPermission(UVCDevices.get(0));
                 }
 
             }
@@ -274,34 +324,74 @@ public class UVCCameraActivity extends BaseActivity implements CameraDialog.Came
         @Override
         public void onConnect(final UsbDevice device, final USBMonitor.UsbControlBlock ctrlBlock, final boolean createNew) {
             Log.d(TAG, "--USB_DEVICE_CONNECTED-- " + device.getProductId());
-            queueEvent(new Runnable() {
-                @Override
-                public void run() {
-                    final UVCCamera camera = new UVCCamera();
-                    camera.open(ctrlBlock);
-                    if (mPreviewSurface != null) {
-                        mPreviewSurface.release();
-                        mPreviewSurface = null;
+            if (UVCDevices.indexOf(device) == 0){
+                // 第一个设备
+                Log.d(TAG, "--USB_DEVICE_CONNECTED_0-- " + device.getProductId());
+
+                queueEvent(new Runnable() {
+                    @Override
+                    public void run() {
+                        final UVCCamera camera = new UVCCamera();
+                        camera.open(ctrlBlock);
+                        if (mPreviewSurfaceL != null) {
+                            mPreviewSurfaceL.release();
+                            mPreviewSurfaceL = null;
+                        }
+                        try {
+                            camera.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 1, 0.5f);
+                        } catch (final IllegalArgumentException e1) {
+                            camera.destroy();
+                            return;
+                        }
+                        final SurfaceTexture st = mUVCCameraViewL.getSurfaceTexture();
+                        if (st != null) {
+                            mPreviewSurfaceL = new Surface(st);
+                            camera.setPreviewDisplay(mPreviewSurfaceL);
+//                        camera.setFrameCallback(uvcFrameCallBackL, UVCCamera.PIXEL_FORMAT_NV21/*UVCCamera.PIXEL_FORMAT_RGB565*/);
+                            camera.setFrameCallback(uvcFrameCallBackL, UVCCamera.PIXEL_FORMAT_YUV420SP/*UVCCamera.PIXEL_FORMAT_RGB565*/);
+                            camera.startPreview();
+                        }
+                        synchronized (mSync) {
+                            mUVCCameraL = camera;
+                        }
+                        mUSBMonitor.requestPermission(UVCDevices.get(1));
                     }
-                    try {
-                        camera.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, UVCCamera.DEFAULT_PREVIEW_MODE);
-                    } catch (final IllegalArgumentException e1) {
-                        camera.destroy();
-                        return;
+                }, 0);
+
+            }else{
+                // 第二个设备
+                Log.d(TAG, "--USB_DEVICE_CONNECTED_1-- " + device.getProductId());
+
+                queueEvent(new Runnable() {
+                    @Override
+                    public void run() {
+                        mUVCCameraR = new UVCCamera();
+                        mUVCCameraR.open(ctrlBlock);
+                        if (mPreviewSurfaceR != null) {
+                            mPreviewSurfaceR.release();
+                            mPreviewSurfaceR = null;
+                        }
+                        try {
+                            mUVCCameraR.setPreviewSize(UVCCamera.DEFAULT_PREVIEW_WIDTH, UVCCamera.DEFAULT_PREVIEW_HEIGHT, 1 , 0.5f);
+                        } catch (final IllegalArgumentException e1) {
+                            mUVCCameraR.destroy();
+                            return;
+                        }
+                        final SurfaceTexture st = mUVCCameraViewR.getSurfaceTexture();
+                        if (st != null) {
+                            mPreviewSurfaceR = new Surface(st);
+                            mUVCCameraR.setPreviewDisplay(mPreviewSurfaceR);
+//                        camera.setFrameCallback(uvcFrameCallBackL, UVCCamera.PIXEL_FORMAT_NV21/*UVCCamera.PIXEL_FORMAT_RGB565*/);
+                            mUVCCameraR.setFrameCallback(uvcFrameCallBackR, UVCCamera.PIXEL_FORMAT_YUV420SP/*UVCCamera.PIXEL_FORMAT_RGB565*/);
+                            mUVCCameraR.startPreview();
+                        }
+//                        synchronized (mSync) {
+//                            mUVCCameraR = camera;
+//                        }
                     }
-                    final SurfaceTexture st = mUVCCameraView.getSurfaceTexture();
-                    if (st != null) {
-                        mPreviewSurface = new Surface(st);
-                        camera.setPreviewDisplay(mPreviewSurface);
-//                        camera.setFrameCallback(uvcFrameCallBack, UVCCamera.PIXEL_FORMAT_NV21/*UVCCamera.PIXEL_FORMAT_RGB565*/);
-                        camera.setFrameCallback(uvcFrameCallBack, UVCCamera.PIXEL_FORMAT_YUV420SP/*UVCCamera.PIXEL_FORMAT_RGB565*/);
-                        camera.startPreview();
-                    }
-                    synchronized (mSync) {
-                        mUVCCamera = camera;
-                    }
-                }
-            }, 0);
+                }, 0);
+            }
+
 
         }
 
@@ -330,11 +420,19 @@ public class UVCCameraActivity extends BaseActivity implements CameraDialog.Came
 
     //region Camera callback
     // UVC RGBFrameCallBack
-    private IFrameCallback uvcFrameCallBack = new IFrameCallback() {
+    private IFrameCallback uvcFrameCallBackL = new IFrameCallback() {
         @Override
         public void onFrame(ByteBuffer frame) {
             uvcBuffer = frame;
-            Log.d(TAG, "rgb frame remain = " + frame.remaining());
+//            Log.d(TAG, "rgb frame remain = " + frame.remaining());
+        }
+    };
+
+    private IFrameCallback uvcFrameCallBackR = new IFrameCallback() {
+        @Override
+        public void onFrame(ByteBuffer frame) {
+            uvcBuffer = frame;
+//            Log.d(TAG, "ir frame remain = " + frame.remaining());
         }
     };
 

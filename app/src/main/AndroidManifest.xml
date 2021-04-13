@@ -30,6 +30,7 @@
         <activity android:name=".UVCAutoTwoViewActivity" />
         <activity android:name=".AndroidCamera2SurfaceViewActivity" />
         <activity android:name=".AndroidCamera2TextureViewActivity" />
+        <activity android:name=".UVCCameraTwoActivity" />
     </application>
 
 </manifest>

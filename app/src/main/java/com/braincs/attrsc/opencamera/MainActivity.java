@@ -131,6 +131,12 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, Constants.REQUEST_CODE);
     }
 
+    public void startUVCAutoTwoViewCamera2(View view) {
+        Intent intent = new Intent(MainActivity.this, UVCCameraTwoActivity.class);
+        intent.putExtra(Constants.INTENT_KEY_CAMERA_FRONT, false);
+        startActivityForResult(intent, Constants.REQUEST_CODE);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
